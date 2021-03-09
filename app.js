@@ -41,6 +41,50 @@ class UI {
 
 };
 
+//store books to local storage
+class Storage {
+    static getBooks(){
+        let books;
+        if(localStorage.getItem('books') === null){
+            books = [];
+        } else {
+            books = JSON.parse(localStorage.getItem('books'));
+        }
+
+        return books;
+    }
+
+    static displayBook(){
+        const books = Storage.getBooks();
+
+        books.forEach(function(book){
+            const ui = new UI();
+
+            ui.addBook(book);
+        })
+    }
+
+    static addBook(book){
+        const books = Storage.getBooks();
+
+        books.push(book);
+        localStorage.setItem('books', JSON.stringify(books));
+    }
+
+    static deleteBook(isbn){
+        const books = Storage.getBooks();
+
+        books.forEach(function(book, index){
+            if(book.isbn === isbn){
+                books.splice(index, 1)
+            };
+        });
+
+        localStorage.setItem('books', JSON.stringify(books));
+    };
+}
+document.addEventListener('DOMContentLoaded', Storage.displayBook);
+
 //check when the user submits the book form
 document.getElementById('book-form').addEventListener('submit', function(e){
 
@@ -65,6 +109,9 @@ document.getElementById('book-form').addEventListener('submit', function(e){
         alert("Please enter an isbn");
     } else {
         ui.addBook(book);
+
+        //add book to local storage
+        Storage.addBook(book);
     }
 
     //clear the fields after a book has been added
@@ -82,5 +129,8 @@ document.getElementById('book-list').addEventListener('click', function(e){
 
     //method to delete a book
     ui.deleteBook(e.target);
+
+    //delete book from local storage
+    Storage.deleteBook(e.target.parentElement.previousElementSibling.textContent);
     e.preventDefault();
 });
